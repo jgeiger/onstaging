@@ -6,11 +6,9 @@ configure :production do
   require 'newrelic_rpm'
 end
 
-set :lock, true
-
 get '/' do
   pair = redis.get("pair_onstaging")
-  response.status = 409 if pair.blank?
+  response.status = 409 if pair.empty?
   pair
 end
 
