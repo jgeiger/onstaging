@@ -6,21 +6,17 @@ configure :production do
   require 'newrelic_rpm'
 end
 
+REDIS_URI = URI.parse(ENV["REDISTOGO_URL"])
+REDIS = Redis.new(:host => REDIS_URI.host, :port => REDIS_URI.port, :password => REDIS_URI.password)
+
 get '/' do
-  pair = redis.get("pair_onstaging")
+  pair = REDIS.get("pair_onstaging")
   response.status = 409 if pair.empty?
   pair
 end
 
 post '/' do
   @pair_onstaging = params[:pair_onstaging]
-  redis.set("pair_onstaging", @pair_onstaging)
-  redis.get("pair_onstaging")
-end
-
-def redis
-  @redis ||= begin
-               uri = URI.parse(ENV["REDISTOGO_URL"])
-               Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
-             end
+  REDIS.set("pair_onstaging", @pair_onstaging)
+  REDIS.get("pair_onstaging")
 end
