@@ -9,12 +9,15 @@ end
 set :lock, true
 
 get '/' do
-  redis.get("pair_onstaging")
+  pair = redis.get("pair_onstaging")
+  response.status = 409 if pair.blank?
+  pair
 end
 
 post '/' do
   @pair_onstaging = params[:pair_onstaging]
   redis.set("pair_onstaging", @pair_onstaging)
+  redis.get("pair_onstaging")
 end
 
 def redis
